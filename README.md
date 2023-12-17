@@ -7,7 +7,7 @@ Ta sẽ truy cập vào đường dẫn SudokuParallel, và biên dịch các fi
 
 ## Hướng dẫn chạy So sánh thuật toán
 - Bước 1: Biên dịch chương trình bằng lệnh: javac ResearchComputation/*.java
-- Bước 2: Chạy chương trình bằng lệnh: java ResearchComputation.MainRunner <file_testcase.txt> <\option> <kernel>  
+- Bước 2: Chạy chương trình bằng lệnh: java ResearchComputation.MainRunner <\file_testcase.txt> <\option> <\kernel>  
 Trong đó:
 - file_testcase.txt: được lưu trong thư mục Test_Cases
 - option: Là lựa chọn mô hình muốn chạy bao gồm SequentialBacktracking (0), SequentialBruteForce (1), ParallelBruteForce (2). Hiện option (2) chưa hoàn thiện
