@@ -52,7 +52,7 @@ public class PanelSolver extends JPanel {
 	int currentLevel = 2;
 	boolean gameStart = false;
 	boolean correct;
-	
+	boolean pause;
 	Queue historyAction;
 
 	public Font getFont(String fontName, int size, int style) {
@@ -226,6 +226,7 @@ public class PanelSolver extends JPanel {
 					SudokuSolver.setLevel(currentLevel);
 					gameStart = true;
 					correct = false;
+					pause = false;
 					counter = 0;
 					timer.start();
 					restGame();
@@ -308,7 +309,7 @@ public class PanelSolver extends JPanel {
 						counter = 0;
 						label.setText(TimeFormat(counter));
 						try {
-							Thread.sleep(2000);
+							Thread.sleep(1000);
 							for (int i = 0; i < 9; i++) {
 								for (int j = 0; j < 9; j++) {
 									boxes[i][j].setText(String.valueOf(grid[i][j]));
@@ -360,12 +361,19 @@ public class PanelSolver extends JPanel {
 		JMenu selectMenu = new JMenu("Tùy chọn");
 		JMenuItem exitOption = new JMenuItem("Thoát");
 		JMenuItem aboutOption = new JMenuItem("Giới thiệu");
+		JMenuItem pauseOption = new JMenuItem("Tạm dừng");
+		JMenuItem resumeOption = new JMenuItem("Tiếp tục");
 		selectMenu.setFont(getFont("Montserrat", 15, Font.PLAIN));
 //		selectMenu.setBorder(BorderFactory.createLineBorder(Color.black, 2, true));
 		selectMenu.add(exitOption);
 		selectMenu.add(aboutOption);
+		selectMenu.add(pauseOption);
+		selectMenu.add(resumeOption);
 		exitOption.setFont(getFont("Montserrat", 15, Font.PLAIN));
 		aboutOption.setFont(getFont("Montserrat", 15, Font.PLAIN));
+		pauseOption.setFont(getFont("Montserrat", 15, Font.PLAIN));
+		resumeOption.setFont(getFont("Montserrat", 15, Font.PLAIN));
+		resumeOption.setVisible(false);
 		exitOption.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -378,6 +386,34 @@ public class PanelSolver extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				JOptionPane.showMessageDialog(center, "Hello World!");
+			}
+		});
+		pauseOption.addActionListener(new ActionListener() {
+
+			@SuppressWarnings("deprecation")
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (gameStart) {
+					pause = true;
+					timer.stop();
+					center.setVisible(false);
+					resumeOption.setVisible(true);
+					pauseOption.setVisible(false);
+				}
+			}
+		});
+		resumeOption.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				if (gameStart) {
+					pause = false;
+					timer.start();
+					center.setVisible(true);
+					pauseOption.setVisible(true);
+					resumeOption.setVisible(false);
+				}
 			}
 		});
 		menuBar.add(selectMenu);

@@ -3,7 +3,7 @@
 module-info.java
 # Log file
 *.log
-
+*.py
 # BlueJ files
 *.ctxt
 

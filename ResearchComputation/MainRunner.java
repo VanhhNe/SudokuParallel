@@ -5,7 +5,10 @@ import java.io.IOException;
 import Interface.MODES;
 
 public class MainRunner {
+	static TestSudoku testValid;
+
 	public static void main(String[] args) throws IOException, CloneNotSupportedException {
+		testValid = new TestSudoku();
 		String fileName = "";
 		MODES MODE = null;
 		int kernel = 4;
@@ -87,12 +90,14 @@ public class MainRunner {
 		SudokuBoard board;
 		try {
 			board = new SudokuBoard(fileName);
-			System.out.println("************************************* INPUT GRID *************************************");
+			System.out
+					.println("************************************* INPUT GRID *************************************");
 			System.out.println("Initialzie empty cells: " + board.get_INIT_NUM_EMPTY_CELLS());
 			System.out.println("BOX_SIZE: " + board.get_BOX_SIZE());
 			board.printBoard(board);
 			System.out.println("Total number cells: " + board.getNumTotalCells());
 			ParallelBruteForce solver = new ParallelBruteForce(board, true, kernel);
+			System.out.println("************************************* OUTPUT GRID *************************************");
 			long begin = System.currentTimeMillis();
 			solver.solve();
 			long end = System.currentTimeMillis();

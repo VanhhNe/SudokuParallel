@@ -16,11 +16,8 @@ public class SudokuBoard implements ISudokuBoard, Cloneable {
 	private int _BOARD_SIZE;
 	private int _MIN_VALUE = 1;
 	private int _MAX_VALUE = 9;
-	private int _NUM_CONSTRAINTS = 4;
-	private static int _INIT_NUM_EMPTY_CELLS;
+	private int _INIT_NUM_EMPTY_CELLS;
 	private static int _EMPTY_CELL_VALUE = 0;
-	private String _EMPTY_CELL_CHARACTER = ".";
-	private int _COVER_MATRIX_START_INDEX = 1;
 
 	public SudokuBoard(int board_size) {
 		this.Board = new int[board_size][board_size];
@@ -47,7 +44,7 @@ public class SudokuBoard implements ISudokuBoard, Cloneable {
 			// Read _BOARD_SIZE from the file
 			_BOARD_SIZE = Integer.parseInt(inputFile.readLine());
 			_BOX_SIZE = (int) Math.sqrt(_BOARD_SIZE);
-			_MAX_VALUE = _BOARD_SIZE * _BOARD_SIZE;
+			_MAX_VALUE = _BOARD_SIZE;
 			sudokuBoard = new int[_BOARD_SIZE][_BOARD_SIZE];
 			// Initialize the sudokuBoard
 			for (int row = 0; row < _BOARD_SIZE; ++row) {
@@ -113,11 +110,7 @@ public class SudokuBoard implements ISudokuBoard, Cloneable {
 		this._BOARD_SIZE = anotherSudokuBoard.get_BOARD_SIZE();
 		this._MIN_VALUE = anotherSudokuBoard.get_MIN_VALUE();
 		this._MAX_VALUE = anotherSudokuBoard.get_MAX_VALUE();
-		this._NUM_CONSTRAINTS = anotherSudokuBoard.get_NUM_CONSTRAINTS();
 		this._INIT_NUM_EMPTY_CELLS = anotherSudokuBoard.get_INIT_NUM_EMPTY_CELLS();
-		this._EMPTY_CELL_CHARACTER = anotherSudokuBoard.get_EMPTY_CELL_CHARACTER();
-		this._EMPTY_CELL_VALUE = anotherSudokuBoard.get_EMPTY_CELL_VALUE();
-		this._COVER_MATRIX_START_INDEX = anotherSudokuBoard.get_COVER_MATRIX_START_INDEX();
 	}
 
 	public SudokuBoard() {
@@ -259,14 +252,6 @@ public class SudokuBoard implements ISudokuBoard, Cloneable {
 		this._MAX_VALUE = _MAX_VALUE;
 	}
 
-	public int get_NUM_CONSTRAINTS() {
-		return _NUM_CONSTRAINTS;
-	}
-
-	public void set_NUM_CONSTRAINTS(int _NUM_CONSTRAINTS) {
-		this._NUM_CONSTRAINTS = _NUM_CONSTRAINTS;
-	}
-
 	public int get_INIT_NUM_EMPTY_CELLS() {
 		return _INIT_NUM_EMPTY_CELLS;
 	}
@@ -283,27 +268,11 @@ public class SudokuBoard implements ISudokuBoard, Cloneable {
 		this._EMPTY_CELL_VALUE = _EMPTY_CELL_VALUE;
 	}
 
-	public String get_EMPTY_CELL_CHARACTER() {
-		return _EMPTY_CELL_CHARACTER;
-	}
-
-	public void set_EMPTY_CELL_CHARACTER(String _EMPTY_CELL_CHARACTER) {
-		this._EMPTY_CELL_CHARACTER = _EMPTY_CELL_CHARACTER;
-	}
-
-	public int get_COVER_MATRIX_START_INDEX() {
-		return _COVER_MATRIX_START_INDEX;
-	}
-
-	public void set_COVER_MATRIX_START_INDEX(int _COVER_MATRIX_START_INDEX) {
-		this._COVER_MATRIX_START_INDEX = _COVER_MATRIX_START_INDEX;
-	}
-
 	@Override
 	public int[][] readInput(int[][] matrix) {
 		_BOARD_SIZE = matrix.length;
 		_BOX_SIZE = (int) Math.sqrt(_BOARD_SIZE);
-		_MAX_VALUE = _BOARD_SIZE * _BOARD_SIZE;
+		_MAX_VALUE = _BOARD_SIZE;
 		int numberEmptyCell = 0;
 		int n = matrix.length;
 		int[][] newBoard = new int[n][n];

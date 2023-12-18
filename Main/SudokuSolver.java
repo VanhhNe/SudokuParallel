@@ -109,7 +109,7 @@ public class SudokuSolver {
 		ArrayList<Integer> randomNumber = getRandomNum();
 
 		for (int i = 0; i < GRID_SIZE; i++) {
-			for (int j = 0; j < 9; j++) {
+			for (int j = 0; j < GRID_SIZE; j++) {
 				grid[i][j] = 0;
 				if ((j + 2) % 2 == 0 && ((i + 2) % 2) == 0) {
 					grid[i][j] = randomNumber.get(k);

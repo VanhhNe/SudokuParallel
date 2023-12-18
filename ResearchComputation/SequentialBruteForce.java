@@ -4,10 +4,10 @@ import Interface.MODES;
 import Interface.pair;
 
 public class SequentialBruteForce extends SudokuSolver {
-	public int[][] finalSolution;
+	public SudokuBoard solutionBoard;
 
 	public SequentialBruteForce(SudokuBoard board, boolean printMessage) throws CloneNotSupportedException {
-		finalSolution = new int[board.get_BOARD_SIZE()][board.get_BOARD_SIZE()];
+		this.solutionBoard = new SudokuBoard(board.getBoard());
 		this.board = board;
 		mode = MODES.SEQUENTIAL_BRUTEFORCE;
 
@@ -39,11 +39,6 @@ public class SequentialBruteForce extends SudokuSolver {
 			System.out.println();
 		}
 	}
-	@Override
-	public SudokuBoard getSolution() {
-		solution = new SudokuBoard(finalSolution);
-		return solution;
-	}
 
 	@Override
 	public void solve() {
@@ -57,31 +52,30 @@ public class SequentialBruteForce extends SudokuSolver {
 			return;
 		}
 		if (mode == MODES.SEQUENTIAL_BRUTEFORCE) {
-			showProgressBar(board, recurtionDepth, 5);
+			showProgressBar(solutionBoard, recurtionDepth, 5);
 		}
 
-		int BOARD_SIZE = board.get_BOARD_SIZE();
+		int BOARD_SIZE = solutionBoard.get_BOARD_SIZE();
 		int abs_index = row * BOARD_SIZE + col;
-		if (abs_index >= board.getNumTotalCells()) {
+		if (abs_index >= solutionBoard.getNumTotalCells()) {
 			solvered = true;
-			finalSolution = copyMatrix(board.getBoard());
+			solution = new SudokuBoard(solutionBoard.getBoard());
 			return;
 		}
 		int row_next = (abs_index + 1) / BOARD_SIZE;
 		int col_next = (abs_index + 1) % BOARD_SIZE;
-		if (!isEmpty(board, row, col)) {
+		if (!isEmpty(solutionBoard, row, col)) {
 			solve_kernel(row_next, col_next);
 		} else {
-			for (int num = board.get_MIN_VALUE(); num <= board.get_MAX_VALUE(); num++) {
+			for (int num = board.get_MIN_VALUE(); num <= solutionBoard.get_MAX_VALUE(); num++) {
 				pair<Integer, Integer> pos = new pair<>(row, col);
-				if (isValid(board, num, pos)) {
-					board.setBoardData(row, col, num);
-
-					if (isUnique(board, num, pos)) {
-						num = board.get_MAX_VALUE() + 1;
+				if (isValid(solutionBoard, num, pos)) {
+					solutionBoard.setBoardData(row, col, num);
+					if (isUnique(solutionBoard, num, pos)) {
+						num = solutionBoard.get_MAX_VALUE() + 1;
 					}
 					solve_kernel(row_next, col_next);
-					board.resetCell(row, col);
+					solutionBoard.resetCell(row, col);
 				}
 			}
 		}
