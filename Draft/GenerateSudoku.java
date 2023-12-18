@@ -1,7 +1,5 @@
 package Draft;
 
-
-
 import java.util.Random;
 import java.util.Scanner;
 
