@@ -28,20 +28,7 @@ public interface ISudokuBoard {
 
 	public void printBoard(SudokuBoard board);
 
+	public void printBoard(SudokuBoard board, boolean solved);
+
 	public void printBoard(int[][] board);
-
-	public int indexInCoverMatrix(int row, int col, int num);
-
-	int createBoxConstraints(int[][] coverMatrix, int header);
-
-	int createColumnConstraints(int[][] coverMatrix, int header);
-
-	int createRowConstraints(int[][] coverMatrix, int header);
-
-	int createCellConstraints(int[][] coverMatrix, int header);
-
-	void createCoverMatrix(int[][] coverMatrix);
-
-	void convertToCoverMatrix(int[][] coverMatrix);
-
 }

@@ -1,16 +1,20 @@
 package ResearchComputation;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import Interface.IParallelBruteForce;
 import Interface.pair;
 
 public class ParallelBruteForce extends SudokuSolver implements IParallelBruteForce {
 
-	private SudokuBoardDeque boardDeque;
 	public int[][] finalSolution;
-	private static int THREAD = 4;
+	private int THREAD;
+	private int numberOfSolutions = 0;
 
 	public ParallelBruteForce() {
 		// TODO Auto-generated constructor stub
@@ -25,137 +29,82 @@ public class ParallelBruteForce extends SudokuSolver implements IParallelBruteFo
 	}
 
 	@Override
-	public void bootstrap() {
-		// TODO Auto-generated method stub
-		if (boardDeque.size() == 0) {
-			return;
-		}
-		SudokuBoard board = boardDeque.front();
-		if (checkIfAllFilled(board)) {
-			return;
-		}
-
-		pair<Integer, Integer> emptyCellPos = findEmpty(board);
-		int row = emptyCellPos.getFirst();
-		int col = emptyCellPos.getSecond();
-
-		for (int num = board.get_MIN_VALUE(); num <= board.get_MAX_VALUE(); num++) {
-			if (isValid(board, num, emptyCellPos)) {
-				board.setBoardData(row, col, num);
-				boardDeque.pushBack(board);
-			}
-		}
-		boardDeque.popFront();
-	}
-
-	@Override
-	public void bootstrap(SudokuBoardDeque boardDeque, int indexOfRows) {
-		// TODO Auto-generated method stub
-		if (boardDeque.size() == 0) {
-			return;
-		}
-		while (!checkIfRowFilled(boardDeque.front(), indexOfRows)) {
-			SudokuBoard board = boardDeque.front();
-			int emptyCellColIdx = findEmptyFromRow(board, indexOfRows);
-
-			for (int num = board.get_MIN_VALUE(); num <= board.get_MAX_VALUE(); num++) {
-				pair<Integer, Integer> emptyCellPos = new pair<Integer, Integer>(indexOfRows, emptyCellColIdx);
-
-				if (isValid(board, num, emptyCellPos)) {
-					board.setBoardData(indexOfRows, emptyCellColIdx, num);
-					boardDeque.pushBack(board);
-				}
-			}
-		}
-		boardDeque.popFront();
-	}
-
-	@Override
 	public void solve() {
-		ExecutorService executors = Executors.newFixedThreadPool(THREAD);
+
+		ExecutorService executors = Executors.newFixedThreadPool(getTHREAD());
+		pair<Integer, Integer> pos = findEmpty(board);
 		for (int num = board.get_MIN_VALUE(); num <= board.get_MAX_VALUE(); num++) {
 			int[][] matrix = copyMatrix(this.board.getBoard());
 			SudokuBoard clonedBoard = new SudokuBoard(matrix);
-			if (isValid(clonedBoard, 0, 0, num)) {
-				executors.submit(() -> solveBruteForcePar(clonedBoard, 0, 0));
+			if (isValid(clonedBoard, num, pos)) {
+				clonedBoard.setBoardData(pos.getFirst(), pos.getSecond(), num);
+				Callable<SudokuBoard> runnableTask = () -> {
+//					SequentialBackTracking tempSolver = new SequentialBackTracking(clonedBoard, false);
+//					tempSolver.solve();
+//					return tempSolver.getSolution();
+					try {
+						SequentialBruteForce tempSolver = new SequentialBruteForce(clonedBoard, false);
+						tempSolver.solve();
+						return tempSolver.getSolution();
+
+					} catch (CloneNotSupportedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						return null;
+					}
+				};
+				Future<SudokuBoard> future = executors.submit(runnableTask);
+				SudokuBoard result = null;
+				try {
+					result = future.get();
+					numberOfSolutions++;
+				} catch (InterruptedException | ExecutionException e) {
+					e.printStackTrace();
+				}
+				if (result != null) {
+					board.printBoard(result, true);
+				}
+				System.out.printf("Added (%d, %d) value: {%d} %n", pos.getFirst(), pos.getSecond(), num);
+				break;
 			}
 		}
 		executors.shutdown();
-	}
-
-	private boolean isValid(SudokuBoard clonedBoard, int i, int j, int num) {
-		// TODO Auto-generated method stub
-		return false;
+		try {
+			if (!executors.awaitTermination(500, TimeUnit.MILLISECONDS)) {
+				executors.shutdownNow();
+			}
+		} catch (InterruptedException e) {
+			executors.shutdown();
+		}
+		System.out.println("Is ExecutorSerivce is shutdown: " + executors.isShutdown());
 	}
 
 	@Override
-	public void solveBruteForcePar(SudokuBoard board, int row, int col) {
-		if (solvered) {
-			return;
-		}
-
-		int BOARD_SIZE = board.get_BOARD_SIZE();
-		int abs_index = row * BOARD_SIZE + col;
-
-		if (abs_index >= board.getNumTotalCells()) {
-			solvered = true;
-			finalSolution = copyMatrix(board.getBoard());
-			return;
-		}
-
-		int row_next = (abs_index + 1) / BOARD_SIZE;
-		int col_next = (abs_index + 1) % BOARD_SIZE;
-		if (!isEmpty(board, row, col)) {
-			solveBruteForcePar(board, row_next, col_next);
-		} else {
-			for (int num = board.get_MIN_VALUE(); num <= board.get_MAX_VALUE(); num++) {
-				pair<Integer, Integer> pos = new pair<>(row, col);
-				if (isValid(board, num, pos)) {
-					board.setBoardData(row, col, num);
-
-					if (isUnique(board, num, pos)) {
-						num = board.get_MAX_VALUE() + 1;
-					}
-					SudokuBoard local_board = new SudokuBoard(BOARD_SIZE);
-					local_board.setBoardData(row, col, num);
-					solveBruteForcePar(local_board, row_next, col_next);
-					board.resetCell(row, col);
-				}
-			}
-		}
+	public SudokuBoard getSolution() {
+		solution = new SudokuBoard(finalSolution);
+		return solution;
 	}
 
 	public int[][] copyMatrix(int[][] original) {
 		int rows = original.length;
 		int cols = original[0].length;
-
 		int[][] copy = new int[rows][cols];
-
 		for (int i = 0; i < rows; i++) {
-			for (int j = 0; j < cols; j++) {
-				copy[i][j] = original[i][j];
-			}
+			System.arraycopy(original[i], 0, copy[i], 0, cols);
 		}
-
 		return copy;
 	}
 
-	@Override
-	public void solveKernel1() {
-		// TODO Auto-generated method stub
-
+	public int getNumberOfSolutions() {
+		return this.numberOfSolutions;
 	}
 
-	@Override
-	public void solveKernel2() {
-		// TODO Auto-generated method stub
-
+	public int getTHREAD() {
+		return this.THREAD;
 	}
 
-	@Override
-	public void solveBruteForceSeq(SudokuBoard board, int row, int col) {
-		// TODO Auto-generated method stub
-
+	public void setTHREAD(int tHREAD) {
+		this.THREAD = tHREAD;
 	}
 
 }

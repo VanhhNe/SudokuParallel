@@ -9,7 +9,7 @@ public class MainRunner {
 		String fileName = "";
 		MODES MODE = null;
 		int kernel = 4;
-		if (args.length == 2) {
+		if (args.length >= 2) {
 			fileName = args[0];
 			int option = Integer.parseInt(args[1]);
 			System.out.println("Option model: " + option);
@@ -30,6 +30,7 @@ public class MainRunner {
 		}
 		if (args.length == 3) {
 			kernel = Integer.parseInt(args[2]);
+			System.out.println(MODE);
 		}
 		printTitle();
 		if (MODE.equals(MODES.SEQUENTIAL_BACKTRACKING)) {
@@ -59,7 +60,45 @@ public class MainRunner {
 			long end = System.currentTimeMillis();
 			System.out.println("Print in main");
 			double time = (double) (end - begin) / 1e3;
-			board.printBoard(solver.finalSolution);
+			board.printBoard(solver.getSolution());
+			System.out.println("[Solved in " + time + " seconds]");
+		} catch (IOException e) {
+			System.out.println(e.getMessage());
+
+		}
+	}
+
+	public static void runSequentialBackTracking(String fileName) throws IOException {
+		SudokuBoard board = new SudokuBoard(fileName);
+		System.out.println("************************************* INPUT GRID *************************************");
+		System.out.println("Initialzie empty cells: " + board.get_INIT_NUM_EMPTY_CELLS());
+		board.printBoard(board);
+		SequentialBackTracking solver = new SequentialBackTracking(board, true);
+		long begin = System.currentTimeMillis();
+		solver.solve();
+		long end = System.currentTimeMillis();
+		double time = (double) (end - begin) / 1e3;
+		System.out.println("************************************* OUTPUT GRID *************************************");
+		board.printBoard(solver.getSolution(), true);
+		System.out.println("[Solved in " + time + " seconds]");
+	}
+
+	public static void runParallelBruteForce(String fileName, int kernel) throws CloneNotSupportedException {
+		SudokuBoard board;
+		try {
+			board = new SudokuBoard(fileName);
+			System.out.println("************************************* INPUT GRID *************************************");
+			System.out.println("Initialzie empty cells: " + board.get_INIT_NUM_EMPTY_CELLS());
+			System.out.println("BOX_SIZE: " + board.get_BOX_SIZE());
+			board.printBoard(board);
+			System.out.println("Total number cells: " + board.getNumTotalCells());
+			ParallelBruteForce solver = new ParallelBruteForce(board, true, kernel);
+			long begin = System.currentTimeMillis();
+			solver.solve();
+			long end = System.currentTimeMillis();
+//			System.out.println("Print in main");
+			double time = (double) (end - begin) / 1e3;
+			System.out.println("Total number of solution: " + solver.getNumberOfSolutions());
 			System.out.println("[Solved in " + time + " seconds]");
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
@@ -75,43 +114,5 @@ public class MainRunner {
 				+ "╚════██║██║   ██║██║  ██║██║   ██║██╔═██╗ ██║   ██║    ╚════██║██║   ██║██║    ╚██╗ ██╔╝██╔══╝  ██╔══██╗\n"
 				+ "███████║╚██████╔╝██████╔╝╚██████╔╝██║  ██╗╚██████╔╝    ███████║╚██████╔╝███████╗╚████╔╝ ███████╗██║  ██║\n"
 				+ "╚══════╝ ╚═════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═╝ ╚═════╝     ╚══════╝ ╚═════╝ ╚══════╝ ╚═══╝  ╚══════╝╚═╝  ╚═╝\n");
-	}
-
-	public static void runSequentialBackTracking(String fileName) throws IOException {
-		SudokuBoard board = new SudokuBoard(fileName);
-		System.out.println("************************************* INPUT GRID *************************************");
-		System.out.println("Initialzie empty cells: " + board.get_INIT_NUM_EMPTY_CELLS());
-		board.printBoard(board);
-		SudokuSolver solver = new SequentialBackTracking(board, true);
-		long begin = System.currentTimeMillis();
-		solver.solve();
-		long end = System.currentTimeMillis();
-		double time = (double) (end - begin) / 1e3;
-		board.printBoard(solver.getSolution());
-		System.out.println("[Solved in " + time + " seconds]");
-	}
-
-	public static void runParallelBruteForce(String fileName, int kernel) throws CloneNotSupportedException {
-		SudokuBoard board;
-		try {
-			board = new SudokuBoard(fileName);
-			System.out
-					.println("************************************* INPUT GRID *************************************");
-			System.out.println("Initialzie empty cells: " + board.get_INIT_NUM_EMPTY_CELLS());
-			System.out.println("BOX_SIZE: " + board.get_BOX_SIZE());
-			board.printBoard(board);
-			System.out.println("Total number cells: " + board.getNumTotalCells());
-			ParallelBruteForce solver = new ParallelBruteForce(board, true, kernel);
-			long begin = System.currentTimeMillis();
-			solver.solve();
-			long end = System.currentTimeMillis();
-			System.out.println("Print in main");
-			double time = (double) (end - begin) / 1e3;
-			board.printBoard(solver.finalSolution);
-			System.out.println("[Solved in " + time + " seconds]");
-		} catch (IOException e) {
-			System.out.println(e.getMessage());
-
-		}
 	}
 }

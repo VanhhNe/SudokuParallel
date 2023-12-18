@@ -10,7 +10,7 @@ public class SudokuSolver implements ISudokuSolver {
 
 	SudokuBoard board;
 	boolean solvered = false;
-	public SudokuBoard solution;
+	SudokuBoard solution;
 	int recurtionDepth = 0;
 	int currentNumEmptyCells;
 	MODES mode;
@@ -221,12 +221,6 @@ public class SudokuSolver implements ISudokuSolver {
 	}
 
 	@Override
-	public void solve() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public void setSolution(SudokuBoard solution) {
 		// TODO Auto-generated method stub
 		this.solution = solution;
@@ -242,6 +236,12 @@ public class SudokuSolver implements ISudokuSolver {
 			}
 		}
 		return solution;
+	}
+
+	@Override
+	public void solve() {
+		// TODO Auto-generated method stub
+
 	}
 
 }

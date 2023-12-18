@@ -4,10 +4,11 @@ import Interface.MODES;
 import Interface.pair;
 
 public class SequentialBackTracking extends SudokuSolver {
-	SudokuBoard board;
+	SudokuBoard solutionBoard;
 
 	public SequentialBackTracking(SudokuBoard board, boolean printMessage) {
 		this.board = board;
+		this.solutionBoard = new SudokuBoard(board.getBoard());
 		mode = MODES.SEQUENTIAL_BACKTRACKING;
 		if (printMessage) {
 			System.out.println("Sequential Sudoku solver using backtracking algorithm starts, please wait ...");
@@ -24,33 +25,32 @@ public class SequentialBackTracking extends SudokuSolver {
 			return solvered;
 		}
 		if (mode == MODES.SEQUENTIAL_BACKTRACKING) {
-			showProgressBar(board, recurtionDepth, 5);
+			showProgressBar(solutionBoard, recurtionDepth, 5);
 		}
-		if (checkIfAllFilled(board)) {
+		if (checkIfAllFilled(solutionBoard)) {
 			solvered = true;
-			solution = board;
+			solution = solutionBoard;
 			return solvered;
 		}
-		pair<Integer, Integer> emptyCellPos = findEmpty(board);
+		pair<Integer, Integer> emptyCellPos = findEmpty(solutionBoard);
 		int row = emptyCellPos.getFirst();
 		int col = emptyCellPos.getSecond();
 
-		for (int num = board.get_MIN_VALUE(); num <= board.get_MAX_VALUE(); num++) {
-			if (isValid(board, num, emptyCellPos)) {
-				board.setBoardData(row, col, num);
-				if (isUnique(board, num, emptyCellPos)) {
-					num = board.get_BOARD_SIZE();
+		for (int num = solutionBoard.get_MIN_VALUE(); num <= solutionBoard.get_MAX_VALUE(); num++) {
+			if (isValid(solutionBoard, num, emptyCellPos)) {
+				solutionBoard.setBoardData(row, col, num);
+				if (isUnique(solutionBoard, num, emptyCellPos)) {
+					num = solutionBoard.get_BOARD_SIZE();
 				}
 				if (solve_kernel()) {
 					solvered = true;
 					return solvered;
 				} else {
-					board.setBoardData(row, col, board.get_EMPTY_CELL_VALUE());
+					solutionBoard.setBoardData(row, col, solutionBoard.get_EMPTY_CELL_VALUE());
 				}
 			}
 		}
 		recurtionDepth++;
-		solvered = false;
 		return solvered;
 	}
 }

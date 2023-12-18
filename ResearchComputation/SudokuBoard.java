@@ -26,7 +26,7 @@ public class SudokuBoard implements ISudokuBoard, Cloneable {
 		this.Board = new int[board_size][board_size];
 		this._BOARD_SIZE = board_size;
 		this._BOX_SIZE = (int) Math.sqrt(_BOARD_SIZE);
-		this._MAX_VALUE = this._BOARD_SIZE * this._BOARD_SIZE;
+		this._MAX_VALUE = this._BOARD_SIZE;
 		_INIT_NUM_EMPTY_CELLS = _BOARD_SIZE * _BOARD_SIZE;
 	}
 
@@ -47,7 +47,7 @@ public class SudokuBoard implements ISudokuBoard, Cloneable {
 			// Read _BOARD_SIZE from the file
 			_BOARD_SIZE = Integer.parseInt(inputFile.readLine());
 			_BOX_SIZE = (int) Math.sqrt(_BOARD_SIZE);
-			_MAX_VALUE = _BOARD_SIZE;
+			_MAX_VALUE = _BOARD_SIZE * _BOARD_SIZE;
 			sudokuBoard = new int[_BOARD_SIZE][_BOARD_SIZE];
 			// Initialize the sudokuBoard
 			for (int row = 0; row < _BOARD_SIZE; ++row) {
@@ -120,6 +120,10 @@ public class SudokuBoard implements ISudokuBoard, Cloneable {
 		this._COVER_MATRIX_START_INDEX = anotherSudokuBoard.get_COVER_MATRIX_START_INDEX();
 	}
 
+	public SudokuBoard() {
+		// TODO Auto-generated constructor stub
+	}
+
 	public void resetCell(int row, int col) {
 		this.Board[row][col] = _EMPTY_CELL_VALUE;
 	}
@@ -174,9 +178,14 @@ public class SudokuBoard implements ISudokuBoard, Cloneable {
 		return numberInCol;
 	}
 
-	public void printBoard(SudokuBoard board) {
+	@Override
+	public void printBoard(SudokuBoard board, boolean solved) {
+		String ANSI_RESET = "\u001B[0m";
+		String ANSI_RED = "\u001B[31m";
+		String ANSI_GREEN = "\u001B[32m";
+		String ANSI_YELLOW = "\u001B[33m";
 		int[][] grid = board.getBoard();
-
+		int[][] initGrid = this.Board;
 		for (int i = 0; i < board._BOARD_SIZE; ++i) {
 			if (i % board._BOX_SIZE == 0 && i != 0) {
 				String s1 = "---";
@@ -188,139 +197,25 @@ public class SudokuBoard implements ISudokuBoard, Cloneable {
 				if (j % board._BOX_SIZE == 0 && j != 0) {
 					System.out.print("  | ");
 				}
-
-				if (j == board._BOARD_SIZE - 1) {
-					System.out.printf("%2d%n", grid[i][j]);
-				} else if (j % board._BOX_SIZE == board._BOX_SIZE - 1) {
-					System.out.printf("%2d", grid[i][j]);
+				if (grid[i][j] == initGrid[i][j]) {
+					if (j == board._BOARD_SIZE - 1) {
+						System.out.printf("%s%2d%n%s", ANSI_GREEN, grid[i][j], ANSI_RESET);
+					} else if (j % board._BOX_SIZE == board._BOX_SIZE - 1) {
+						System.out.printf("%s%2d%s", ANSI_GREEN, grid[i][j], ANSI_RESET);
+					} else {
+						System.out.printf("%s%2d%s ", ANSI_GREEN, grid[i][j], ANSI_RESET);
+					}
 				} else {
-					System.out.printf("%2d ", grid[i][j]);
-				}
-			}
-		}
-	}
-
-	@Override
-	public int indexInCoverMatrix(int row, int col, int num) {
-		return (row - 1) * _BOARD_SIZE * _BOARD_SIZE + (col - 1) & _BOARD_SIZE + (num - 1);
-	}
-
-	@Override
-	public int createBoxConstraints(int[][] coverMatrix, int header) {
-		for (int row = _COVER_MATRIX_START_INDEX; row <= _BOARD_SIZE; row += _BOX_SIZE) {
-			for (int col = _COVER_MATRIX_START_INDEX; col <= _BOARD_SIZE; col += _BOX_SIZE) {
-				for (int n = _COVER_MATRIX_START_INDEX; n <= _BOARD_SIZE; n++) {
-					for (int rowDelta = 0; rowDelta < _BOX_SIZE; ++rowDelta) {
-						for (int colDelta = 0; colDelta < _BOX_SIZE; ++colDelta) {
-							int index = indexInCoverMatrix(row + rowDelta, col + colDelta, n);
-							coverMatrix[index][header] = 1;
-						}
-					}
-					header++;
-				}
-			}
-		}
-		return header;
-	}
-
-	@Override
-	public int createColumnConstraints(int[][] coverMatrix, int header) {
-		for (int col = _COVER_MATRIX_START_INDEX; col <= _BOARD_SIZE; ++col) {
-			for (int n = _COVER_MATRIX_START_INDEX; n <= _BOARD_SIZE; n++) {
-				for (int row = _COVER_MATRIX_START_INDEX; row <= _BOARD_SIZE; row++) {
-					int index = indexInCoverMatrix(row, col, n);
-					coverMatrix[index][header] = 1;
-				}
-				header++;
-			}
-		}
-		return header;
-	}
-
-	@Override
-	public int createRowConstraints(int[][] coverMatrix, int header) {
-		for (int row = _COVER_MATRIX_START_INDEX; row <= _BOARD_SIZE; row++) {
-			for (int n = _COVER_MATRIX_START_INDEX; n <= _BOARD_SIZE; n++) {
-				for (int col = _COVER_MATRIX_START_INDEX; col < _BOARD_SIZE; col++) {
-					int index = indexInCoverMatrix(row, col, n);
-					coverMatrix[index][header] = 1;
-				}
-				header++;
-			}
-		}
-		return header;
-	}
-
-	@Override
-	public int createCellConstraints(int[][] coverMatrix, int header) {
-		for (int row = _COVER_MATRIX_START_INDEX; row <= _BOARD_SIZE; row++) {
-			for (int col = _COVER_MATRIX_START_INDEX; col <= _BOARD_SIZE; col++) {
-				for (int n = _COVER_MATRIX_START_INDEX; n < _BOARD_SIZE; n++) {
-					int index = indexInCoverMatrix(row, col, n);
-					coverMatrix[index][header] = 1;
-				}
-				header++;
-			}
-		}
-		return header;
-	}
-
-	@Override
-	public void createCoverMatrix(int[][] coverMatrix) {
-		int numberOfRows = _BOARD_SIZE * _BOARD_SIZE * _MAX_VALUE;
-		int numberOfCols = _BOARD_SIZE * _BOARD_SIZE * _NUM_CONSTRAINTS;
-
-		coverMatrix = new int[numberOfRows][numberOfCols];
-
-		int header = 0;
-		header = createCellConstraints(coverMatrix, header);
-		header = createRowConstraints(coverMatrix, header);
-		header = createColumnConstraints(coverMatrix, header);
-		createBoxConstraints(coverMatrix, header);
-	}
-
-	@Override
-	public void convertToCoverMatrix(int[][] coverMatrix) {
-		for (int row = _COVER_MATRIX_START_INDEX; row < _BOARD_SIZE; row++) {
-			for (int col = _COVER_MATRIX_START_INDEX; col < _BOARD_SIZE; col++) {
-				int n = this.Board[row - 1][col - 1];
-				if (n != _EMPTY_CELL_VALUE) {
-					for (int num = _MIN_VALUE; num <= _MAX_VALUE; ++num) {
-						if (num != n) {
-							int index = indexInCoverMatrix(row, col, num);
-							for (int i = 0; i < _BOARD_SIZE * _BOARD_SIZE * _NUM_CONSTRAINTS; i++) {
-								coverMatrix[index][i] = 0;
-							}
-						}
+					if (j == board._BOARD_SIZE - 1) {
+						System.out.printf("%2d%n", grid[i][j]);
+					} else if (j % board._BOX_SIZE == board._BOX_SIZE - 1) {
+						System.out.printf("%2d", grid[i][j]);
+					} else {
+						System.out.printf("%2d ", grid[i][j]);
 					}
 				}
 			}
 		}
-	}
-
-	class MultiType<T> {
-		private T value;
-
-		public MultiType(T value) {
-			this.value = value;
-		}
-
-		public T getValue() {
-			return value;
-		}
-	}
-
-	private static class StateMatrix<T> extends ArrayList<ArrayList<MultiType<T>>> {
-
-	}
-
-	// State information to the Sudoku board
-	void createStateMatrix(StateMatrix stateMatrix) {
-
-	}
-
-	void convertToStateMatrix(StateMatrix stateMatrix) {
-
 	}
 
 	/*----------------------- DEFAULT GETTER-SETTER METHOD -----------------------*/
@@ -429,6 +324,9 @@ public class SudokuBoard implements ISudokuBoard, Cloneable {
 
 	@Override
 	public void printBoard(int[][] grid) {
+		if (grid == null) {
+			return;
+		}
 		int BOARD_SIZE = grid.length;
 		int BOX_SIZE = (int) Math.sqrt(BOARD_SIZE);
 		// TODO Auto-generated method stub
@@ -453,5 +351,33 @@ public class SudokuBoard implements ISudokuBoard, Cloneable {
 				}
 			}
 		}
+	}
+
+	@Override
+	public void printBoard(SudokuBoard board) {
+		int[][] grid = board.getBoard();
+
+		for (int i = 0; i < board._BOARD_SIZE; ++i) {
+			if (i % board._BOX_SIZE == 0 && i != 0) {
+				String s1 = "---";
+				String s2 = s1.repeat(board._BOX_SIZE) + " + ";
+				System.out.print(s2.repeat(board._BOX_SIZE - 1) + s1.repeat(board._BOX_SIZE) + "\n");
+			}
+
+			for (int j = 0; j < board._BOARD_SIZE; ++j) {
+				if (j % board._BOX_SIZE == 0 && j != 0) {
+					System.out.print("  | ");
+				}
+
+				if (j == board._BOARD_SIZE - 1) {
+					System.out.printf("%2d%n", grid[i][j]);
+				} else if (j % board._BOX_SIZE == board._BOX_SIZE - 1) {
+					System.out.printf("%2d", grid[i][j]);
+				} else {
+					System.out.printf("%2d ", grid[i][j]);
+				}
+			}
+		}
+
 	}
 }

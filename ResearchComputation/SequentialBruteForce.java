@@ -8,7 +8,6 @@ public class SequentialBruteForce extends SudokuSolver {
 
 	public SequentialBruteForce(SudokuBoard board, boolean printMessage) throws CloneNotSupportedException {
 		finalSolution = new int[board.get_BOARD_SIZE()][board.get_BOARD_SIZE()];
-		this.solution = (SudokuBoard) board.clone();
 		this.board = board;
 		mode = MODES.SEQUENTIAL_BRUTEFORCE;
 
@@ -39,6 +38,11 @@ public class SequentialBruteForce extends SudokuSolver {
 			}
 			System.out.println();
 		}
+	}
+	@Override
+	public SudokuBoard getSolution() {
+		solution = new SudokuBoard(finalSolution);
+		return solution;
 	}
 
 	@Override
