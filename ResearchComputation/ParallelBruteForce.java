@@ -87,7 +87,7 @@ public class ParallelBruteForce extends SudokuSolver implements IParallelBruteFo
 			bootstrap();
 		}
 		int numberOfBoards = boardDeque.size();
-		System.out.println("Number of board: " + numberOfBoards);
+		System.out.println("Number of board after bootstrap: " + numberOfBoards);
 		for (int i = 0; i < numberOfBoards; i++) {
 			SudokuBoard tempBoard = boardDeque.get(i);
 			int[][] matrix = copyMatrix(tempBoard.getBoard());
@@ -97,9 +97,6 @@ public class ParallelBruteForce extends SudokuSolver implements IParallelBruteFo
 					SequentialBruteForce tempSolver = new SequentialBruteForce(clonedBoard, false);
 					tempSolver.setMode(MODES.PARALLEL_BRUTEFORCE);
 					tempSolver.solve();
-					if (tempSolver.getStatus()) {
-						this.solvered = true;
-					}
 					return tempSolver;
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -124,9 +121,13 @@ public class ParallelBruteForce extends SudokuSolver implements IParallelBruteFo
 			Future<SequentialBruteForce> tempSolver = result.get(i);
 			try {
 				if (tempSolver.get().getStatus()) {
-					board.printBoard(tempSolver.get().getSolution(), true);
+					if (!solvered) {
+						board.printBoard(tempSolver.get().getSolution(), true);
+						System.out.println("*****************");
+					}
+					solvered = true;
 					numberOfSolutions++;
-					break;
+//					break;
 				}
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
@@ -139,13 +140,13 @@ public class ParallelBruteForce extends SudokuSolver implements IParallelBruteFo
 		}
 		executors.shutdown();
 		try {
-			if (!executors.awaitTermination(100, TimeUnit.MILLISECONDS)) {
+			if (!executors.awaitTermination(1000, TimeUnit.MILLISECONDS)) {
 				executors.shutdownNow();
 			}
 		} catch (InterruptedException e) {
 			executors.shutdown();
 		}
-		System.out.println("Is ExecutorSerivce is shutdown: " + executors.isShutdown());
+		System.out.println("Is ExecutorSerivce shutdown: " + executors.isShutdown());
 	}
 
 //	@Override
@@ -153,11 +154,12 @@ public class ParallelBruteForce extends SudokuSolver implements IParallelBruteFo
 //		ExecutorService executors = Executors.newFixedThreadPool(getTHREAD());
 //		List<Callable<SudokuBoard>> callabeTasks = new ArrayList<>();
 //		pair<Integer, Integer> pos = findEmpty(board);
-//		for (int num = board.get_MIN_VALUE(); num <= board.get_MAX_VALUE(); num++) {
+//		for (int num = board.get_MIN_VALUE(); num <= board.get_BOARD_SIZE(); num++) {
 //			int[][] matrix = copyMatrix(this.board.getBoard());
 //			SudokuBoard clonedBoard = new SudokuBoard(matrix);
 //			if (isValid(clonedBoard, num, pos)) {
 //				System.out.printf("Added (%d, %d) value: {%d} %n", pos.getFirst(), pos.getSecond(), num);
+//				clonedBoard.set_MAX_VALUE(clonedBoard.get_BOARD_SIZE());
 //				clonedBoard.setBoardData(pos.getFirst(), pos.getSecond(), num);
 //				Callable<SudokuBoard> runnableTask = () -> {
 ////					SequentialBackTracking tempSolver = new SequentialBackTracking(clonedBoard, false);
