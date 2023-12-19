@@ -190,7 +190,7 @@ public class GenerateSudokuBoard {
         hideCell(rate);
         printArray2D(board);
 
-        String fileName = "D:\\CTDL-TT\\finalexam\\SudokuParallel\\Test_Cases\\";
+        String fileName = "/home/vanhnee/eclipse-workspace/SudokuParallel/Test_Cases/";
         fileName = String.format("%sgen_%dx%d_%s.txt", fileName, size, size, temp);
         System.out.println(fileName);
         

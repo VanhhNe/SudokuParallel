@@ -58,25 +58,25 @@ public class ParallelBruteForce extends SudokuSolver implements IParallelBruteFo
 		boardDeque.popFront();
 	}
 
-	public void boostrap(SudokuBoardDeque boardDeque, int indexOfRows) {
-		if (boardDeque.size() == 0) {
-			return;
-		}
-
-		while (!checkIfRowFilled(boardDeque.front(), indexOfRows)) {
-			SudokuBoard board = boardDeque.front();
-			int emptyCellColIndex = findEmptyFromRow(board, indexOfRows);
-
-			for (int num = board.get_MIN_VALUE(); num <= board.get_MAX_VALUE(); num++) {
-				pair<Integer, Integer> pos = new pair<Integer, Integer>(indexOfRows, emptyCellColIndex);
-				if (isValid(board, num, pos)) {
-					board.setBoardData(pos.getFirst(), pos.getSecond(), num);
-					boardDeque.pushBack(new SudokuBoard(board));
-				}
-			}
-			boardDeque.popFront();
-		}
-	}
+//	public void boostrap(SudokuBoardDeque boardDeque, int indexOfRows) {
+//		if (boardDeque.size() == 0) {
+//			return;
+//		}
+//
+//		while (!checkIfRowFilled(boardDeque.front(), indexOfRows)) {
+//			SudokuBoard board = boardDeque.front();
+//			int emptyCellColIndex = findEmptyFromRow(board, indexOfRows);
+//
+//			for (int num = board.get_MIN_VALUE(); num <= board.get_MAX_VALUE(); num++) {
+//				pair<Integer, Integer> pos = new pair<Integer, Integer>(indexOfRows, emptyCellColIndex);
+//				if (isValid(board, num, pos)) {
+//					board.setBoardData(pos.getFirst(), pos.getSecond(), num);
+//					boardDeque.pushBack(new SudokuBoard(board));
+//				}
+//			}
+//			boardDeque.popFront();
+//		}
+//	}
 
 	@Override
 	public void solve() {
@@ -117,27 +117,44 @@ public class ParallelBruteForce extends SudokuSolver implements IParallelBruteFo
 			executors.shutdown();
 			return;
 		}
-		for (int i = 0; i < result.size(); i++) {
-			Future<SequentialBruteForce> tempSolver = result.get(i);
+		for (Future<SequentialBruteForce> future : result) {
 			try {
-				if (tempSolver.get().getStatus()) {
-					if (!solvered) {
-						board.printBoard(tempSolver.get().getSolution(), true);
-						System.out.println("*****************");
-					}
-					solvered = true;
-					numberOfSolutions++;
-//					break;
-				}
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ExecutionException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+				SequentialBruteForce tempSolver = future.get();
 
+				if (tempSolver.getStatus()) {
+					for (Future<SequentialBruteForce> otherFuture : result) {
+
+						otherFuture.cancel(true);
+					}
+					board.printBoard(tempSolver.getSolution(), true);
+					numberOfSolutions++;
+					break;
+				}
+			} catch (ExecutionException | InterruptedException e) {
+				e.printStackTrace(); // Handle exceptions from task execution
+			}
 		}
+//		for (int i = 0; i < result.size(); i++) {
+//			Future<SequentialBruteForce> tempSolver = result.get(i);
+//			try {
+//				if (tempSolver.get().getStatus()) {
+//					if (!solvered) {
+//						board.printBoard(tempSolver.get().getSolution(), true);
+//						System.out.println("*****************");
+//					}
+//					solvered = true;
+//					numberOfSolutions++;
+////					break;
+//				}
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			} catch (ExecutionException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//
+//		}
 		executors.shutdown();
 		try {
 			if (!executors.awaitTermination(1000, TimeUnit.MILLISECONDS)) {
