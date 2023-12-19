@@ -168,7 +168,7 @@ public class GenerateSudokuBoard {
             case 1:
                 temp = "easy";
                 System.out.println(temp);
-                rate = 0.5;
+                rate = 0.45;
                 break;
             case 2:
                 temp = "median";
