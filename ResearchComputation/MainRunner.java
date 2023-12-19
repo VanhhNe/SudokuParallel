@@ -92,10 +92,10 @@ public class MainRunner {
 			board = new SudokuBoard(fileName);
 			System.out
 					.println("************************************* INPUT GRID *************************************");
-			System.out.println("Initialzie empty cells: " + board.get_INIT_NUM_EMPTY_CELLS());
 			System.out.println("BOX_SIZE: " + board.get_BOX_SIZE());
 			board.printBoard(board);
 			System.out.println("Total number cells: " + board.getNumTotalCells());
+			System.out.println("Initialzie empty cells: " + board.get_INIT_NUM_EMPTY_CELLS());
 			ParallelBruteForce solver = new ParallelBruteForce(board, true, kernel);
 			System.out.println("************************************* OUTPUT GRID *************************************");
 			long begin = System.currentTimeMillis();
